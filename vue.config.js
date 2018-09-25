@@ -31,6 +31,7 @@ module.exports = {
       config.externals = {
         'vue': 'Vue',
         'vue-router': 'VueRouter',
+        'vuex': 'Vuex',
         'better-scroll': 'BScroll'
       }
     }
