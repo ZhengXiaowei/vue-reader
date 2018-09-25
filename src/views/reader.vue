@@ -65,21 +65,11 @@ export default {
   },
   data() {
     return {
-      direction: localStorage.getItem('direction') || "horizontal",
+      direction: localStorage.getItem('direction') || "vertical",
       pageCount: 1,
       page: 1,
-      distance: 0,
-      open: false,
       font: localStorage.getItem('fontSize') || 14
     };
-  },
-  methods: {
-    changeDirection() {
-      this.open = !this.open;
-    }
-  },
-  mounted() {
-    console.log(this.$refs.reader)
   }
 };
 </script>

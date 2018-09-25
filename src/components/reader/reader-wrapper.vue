@@ -64,7 +64,7 @@ export default {
   props: {
     probeType: {
       type: Number,
-      default: 1
+      default: 2
     },
     click: {
       type: Boolean,
@@ -166,13 +166,14 @@ export default {
 
       // * 监听手指离开屏幕的事件 并返回最后的x，y坐标和移动方向
       if (this.direction === DIRECTION_H) {
-        this.reader.on("touchEnd", pos => {
+        // todos touchEnd无法获取directionX的值
+        this.reader.on("scrollEnd", pos => {
           // * 内部滑动事件
           this._touch({
             pos,
             dir: {
-              x: this.reader.movingDirectionX,
-              y: this.reader.movingDirectionY
+              x: this.reader.directionX,
+              y: this.reader.directionY
             }
           });
           // * 外抛 用于做拓展事件
