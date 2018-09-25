@@ -1,5 +1,5 @@
 <template>
-  <div class="reader-menu">
+  <div class="reader-menu" @click.stop>
     <div class="reader-menu__box">
       <div class="menu-box__text">字号</div>
       <div class="menu-box__item">
