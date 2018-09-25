@@ -327,6 +327,7 @@ export default {
 .reader-wrapper {
   position relative
   height 100%
+  transition background .5s
 
   .wrapper-content {
     display inline-block
