@@ -5,8 +5,7 @@
          fontSize: fz,
          background: night ? nightStyle.background : bgStyleList[bgIndex].background,
          color: night ? nightStyle.color : bgStyleList[bgIndex].color
-        }"
-       @click.stop="tapReader">
+        }">
     <!-- 阅读器部分 -->
     <div :class="[
       'wrapper-content',
@@ -101,7 +100,9 @@ export default {
       distance: 0,
       bgStyleList: ReaderOptions.bgColorStyles,
       nightStyle: ReaderOptions.nightStyle,
-      open: false
+      open: false,
+      clickBehavior: false,
+      preventQuickClick: false
     };
   },
   watch: {
@@ -158,23 +159,19 @@ export default {
         scrollX: this.direction === DIRECTION_H,
         startY: this.startY,
         bounce: this.bounce,
-        momentum: this.direction === DIRECTION_V,
-        tap: true
+        momentum: this.direction === DIRECTION_V
       };
 
       this.reader = new BScroll(this.$refs.wrapper, options);
 
       // * 监听手指离开屏幕的事件 并返回最后的x，y坐标和移动方向
       if (this.direction === DIRECTION_H) {
-        // todos touchEnd无法获取directionX的值
-        this.reader.on("scrollEnd", pos => {
+        // * 通过位移distX判断方向
+        this.reader.on("touchEnd", pos => {
           // * 内部滑动事件
           this._touch({
             pos,
-            dir: {
-              x: this.reader.directionX,
-              y: this.reader.directionY
-            }
+            dir: this.reader.distX === 0 ? 0 : this.reader.distX < 0 ? 1 : -1
           });
           // * 外抛 用于做拓展事件
           this.$emit("touch", pos);
@@ -213,7 +210,16 @@ export default {
       // * 重置滚动位置
       this.scrollTo(0, 0);
     },
-    tapReader(e) {
+    changeDir(dir) {
+      this.$emit("update:direction", dir);
+    },
+    changeFont(font) {
+      this.$emit("update:font", font);
+    },
+    changeBgStyle() {
+      this.$emit("bgUpdate");
+    },
+    _tapReader(e) {
       // * 根据手指触点判断阅读器行为
       ReaderTouch.tap({
         touch: e,
@@ -228,29 +234,27 @@ export default {
         }
       });
     },
-    changeDir(dir) {
-      this.$emit("update:direction", dir);
-    },
-    changeFont(font) {
-      this.$emit("update:font", font);
-    },
-    changeBgStyle() {
-      this.$emit("bgUpdate");
-    },
     _touch({ pos, dir }) {
       // * 只对横向滚动 边界判断
       if (this.direction === DIRECTION_V) return;
+      // * 阅读器点击行为
+      if (dir === 0) {
+        // * point为手指的触点坐标
+        let { pointX, pointY } = this.reader;
+        this._tapReader({ x: pointX, y: pointY });
+        return;
+      }
       this.distance = pos.x;
       let arr = this.disArr;
       let pageDir = arr[this.curPage - 1];
       let diff = this.distance - pageDir;
       // * 从右向左滑
-      if (dir.x === 1) {
+      if (dir === 1) {
         if (diff < THRESHOLD_NEXT) this._nextPage();
         else this._lockPage();
       }
       // * 从左向右滑
-      if (dir.x === -1) {
+      if (dir === -1) {
         if (diff > THRESHOLD_PREV) this._prevPage();
         else this._lockPage();
       }
